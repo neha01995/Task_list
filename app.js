@@ -13,6 +13,8 @@ loadEventListeners();
 function loadEventListeners(){
    // add task form
 
+   document.addEventListener('DOMContentLoaded', getTasks);
+
    form.addEventListener('submit', addTask);
    taskList.addEventListener('click', removeTask);
    // clear tasks
@@ -20,6 +22,36 @@ function loadEventListeners(){
 
    //filter tasks
    filter.addEventListener('click', filterTasks);
+}
+
+function getTasks(){
+    let tasks;
+    if(localStorage.getItem('tasks')=== null){
+        tasks=[];
+    }else{
+        tasks= JSON.parse(localStorage.getItem('tasks'));
+    }
+
+    tasks.forEach(function(task){
+
+    const li = document.createElement('li');
+    li.className = 'collection-item';
+
+    li.appendChild(document.createTextNode(task));
+    
+    // create new link
+    const link = document.createElement('a');
+    // add class
+    link.className = 'delete-item secondary-content';
+    // add icon html
+    link.innerHTML = '<i class="fa fa-remove"</i>'
+
+    //append the link to li
+    li.appendChild(link);
+    taskList.appendChild(li);
+
+    });
+
 }
 
 // Add task
@@ -71,11 +103,30 @@ function removeTask(e){
     if(e.target.parentElement.classList.contains('delete-item')){
         if(confirm('Are u sure?')){
             e.target.parentElement.parentElement.remove();
+
+            removeTasksFromLocalStorage(e.target.parentElement.parentElement);
         }
       
 
     }
   
+}
+
+function removeTasksFromLocalStorage(taskItem){
+    let tasks;
+    if(localStorage.getItem('tasks')=== null){
+        tasks=[];
+    }else{
+        tasks= JSON.parse(localStorage.getItem('tasks'));
+    }
+
+    tasks.forEach(function(task, index){
+        if(taskItem.textContent === task){
+            tasks.splice(index,1);
+        }
+    });
+
+    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 // clear tasks
@@ -87,6 +138,13 @@ function clearTasks(){
         taskList.removeChild(taskList.firstChild);
     }
 
+    clearTasksFromLocalStorage();
+
+}
+
+// clear all from local storage
+function clearTasksFromLocalStorage(){
+    localStorage.clear();
 }
 
 function filterTasks(e){
